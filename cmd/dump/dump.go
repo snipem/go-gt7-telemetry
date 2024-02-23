@@ -23,7 +23,7 @@ func prettyPrintStruct(data interface{}) {
 func main() {
 	gt7c := gt7.NewGT7Communication("255.255.255.255")
 	go gt7c.Run()
-	for true {
+	for {
 		fmt.Print("\033[H\033[2J")
 		prettyPrintStruct(gt7c.LastData)
 		time.Sleep(160 * time.Millisecond)
