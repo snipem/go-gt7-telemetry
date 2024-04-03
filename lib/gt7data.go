@@ -7,76 +7,93 @@ import (
 )
 
 type GTData struct {
-	PackageID         int32
-	BestLap           int32
-	LastLap           int32
-	CurrentLap        int16
-	CurrentGear       uint8
-	SuggestedGear     uint8
-	FuelCapacity      float32
-	CurrentFuel       float32
-	Boost             float32
-	TyreDiameterFL    float32
-	TyreDiameterFR    float32
-	TyreDiameterRL    float32
-	TyreDiameterRR    float32
-	TypeSpeedFL       float32
-	TypeSpeedFR       float32
-	TypeSpeedRL       float32
-	TyreSpeedRR       float32
-	CarSpeed          float32
-	TyreSlipRatioFL   string
-	TyreSlipRatioFR   string
-	TyreSlipRatioRL   string
-	TyreSlipRatioRR   string
-	TimeOnTrack       Duration
-	TotalLaps         int16
-	CurrentPosition   int16
-	TotalPositions    int16
-	CarID             int32
-	Throttle          float32
-	RPM               float32
-	RPMRevWarning     uint16
-	Brake             float32
-	RPMRevLimiter     uint16
-	EstimatedTopSpeed int16
-	Clutch            float32
-	ClutchEngaged     float32
-	RPMAfterClutch    float32
-	OilTemp           float32
-	WaterTemp         float32
-	OilPressure       float32
-	RideHeight        float32
-	TyreTempFL        float32
-	TyreTempFR        float32
-	SuspensionFL      float32
-	SuspensionFR      float32
-	TyreTempRL        float32
-	TyreTempRR        float32
-	SuspensionRL      float32
-	SuspensionRR      float32
-	Gear1             float32
-	Gear2             float32
-	Gear3             float32
-	Gear4             float32
-	Gear5             float32
-	Gear6             float32
-	Gear7             float32
-	Gear8             float32
-	PositionX         float32
-	PositionY         float32
-	PositionZ         float32
-	VelocityX         float32
-	VelocityY         float32
-	VelocityZ         float32
-	RotationPitch     float32
-	RotationYaw       float32
-	RotationRoll      float32
-	AngularVelocityX  float32
-	AngularVelocityY  float32
-	AngularVelocityZ  float32
-	IsPaused          bool
-	InRace            bool
+	PackageID            int32
+	BestLap              int32
+	LastLap              int32
+	CurrentLap           int16
+	CurrentGear          uint8
+	SuggestedGear        uint8
+	FuelCapacity         float32
+	CurrentFuel          float32
+	Boost                float32
+	TyreDiameterFL       float32
+	TyreDiameterFR       float32
+	TyreDiameterRL       float32
+	TyreDiameterRR       float32
+	TypeSpeedFL          float32
+	TypeSpeedFR          float32
+	TypeSpeedRL          float32
+	TyreSpeedRR          float32
+	CarSpeed             float32
+	TyreSlipRatioFL      string
+	TyreSlipRatioFR      string
+	TyreSlipRatioRL      string
+	TyreSlipRatioRR      string
+	TimeOnTrack          Duration
+	TotalLaps            int16
+	CurrentPosition      int16
+	TotalPositions       int16
+	CarID                int32
+	Throttle             float32
+	RPM                  float32
+	RPMRevWarning        uint16
+	Brake                float32
+	RPMRevLimiter        uint16
+	EstimatedTopSpeed    int16
+	Clutch               float32
+	ClutchEngaged        float32
+	RPMAfterClutch       float32
+	OilTemp              float32
+	WaterTemp            float32
+	OilPressure          float32
+	RideHeight           float32
+	TyreTempFL           float32
+	TyreTempFR           float32
+	SuspensionFL         float32
+	SuspensionFR         float32
+	TyreTempRL           float32
+	TyreTempRR           float32
+	SuspensionRL         float32
+	SuspensionRR         float32
+	Gear1                float32
+	Gear2                float32
+	Gear3                float32
+	Gear4                float32
+	Gear5                float32
+	Gear6                float32
+	Gear7                float32
+	Gear8                float32
+	PositionX            float32
+	PositionY            float32
+	PositionZ            float32
+	VelocityX            float32
+	VelocityY            float32
+	VelocityZ            float32
+	RotationPitch        float32
+	RotationYaw          float32
+	RotationRoll         float32
+	AngularVelocityX     float32
+	AngularVelocityY     float32
+	AngularVelocityZ     float32
+	IsPaused             bool
+	InRace               bool
+	IsLoading            bool
+	IsInGear             bool
+	CarHasTurbo          bool
+	IsRevLimiterFlashing bool
+	IsHandbrakeEngaged   bool
+	IsLightsOn           bool
+	IsLowBeamOn          bool
+	IsHighBeamOn         bool
+	IsASMEngaged         bool
+	IsTCSEngaged         bool
+	// Following flags are unknown
+	// See https://www.gtplanet.net/forum/threads/gt7-is-compatible-with-motion-rig.410728/page-4#post-13799643
+	// for more information
+	UnknownFlag12 byte
+	UnknownFlag13 byte
+	UnknownFlag14 byte
+	UnknownFlag15 byte
 }
 
 type Duration struct {
@@ -173,9 +190,27 @@ func NewGTData(ddata []byte) GTData {
 	data.AngularVelocityX = math.Float32frombits(binary.LittleEndian.Uint32(ddata[0x1C : 0x1C+4]))
 	data.AngularVelocityY = math.Float32frombits(binary.LittleEndian.Uint32(ddata[0x20 : 0x20+4]))
 	data.AngularVelocityZ = math.Float32frombits(binary.LittleEndian.Uint32(ddata[0x24 : 0x24+4]))
-	// TODO does not work
-	data.IsPaused = ddata[0xE8 : 0xE8+1][0] == 1
-	data.InRace = ddata[0x0C : 0x0C+1][0] == 1
+
+	flags := ddata[0x8E : 0x8E+2]
+
+	data.InRace = flags[0]&1 == 1
+	data.IsPaused = (flags[0]>>1)&1 == 1
+	data.IsLoading = (flags[0]>>2)&1 == 1
+	data.IsInGear = (flags[0]>>3)&1 == 1
+	data.CarHasTurbo = (flags[0]>>4)&1 == 1
+	data.IsRevLimiterFlashing = (flags[0]>>5)&1 == 1
+	data.IsHandbrakeEngaged = (flags[0]>>6)&1 == 1
+	data.IsLightsOn = (flags[0]>>7)&1 == 1
+
+	data.IsLowBeamOn = (flags[1])&1 == 1
+	data.IsHighBeamOn = (flags[1]>>1)&1 == 1
+	data.IsASMEngaged = (flags[1]>>2)&1 == 1
+	data.IsTCSEngaged = (flags[1]>>3)&1 == 1
+
+	data.UnknownFlag12 = (flags[1] >> 4) & 1
+	data.UnknownFlag13 = (flags[1] >> 5) & 1
+	data.UnknownFlag14 = (flags[1] >> 6) & 1
+	data.UnknownFlag15 = (flags[1] >> 7) & 1
 
 	return data
 }

@@ -8,7 +8,7 @@ import (
 func main() {
 	gt7c := gt7.NewGT7Communication("255.255.255.255")
 	go gt7c.Run()
-	for true {
+	for {
 		fmt.Println(gt7c.LastData.CarSpeed)
 	}
 }
