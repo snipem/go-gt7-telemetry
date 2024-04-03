@@ -25,10 +25,10 @@ type GTData struct {
 	TypeSpeedRL          float32
 	TyreSpeedRR          float32
 	CarSpeed             float32
-	TyreSlipRatioFL      string
-	TyreSlipRatioFR      string
-	TyreSlipRatioRL      string
-	TyreSlipRatioRR      string
+	TyreSlipRatioFL      float32
+	TyreSlipRatioFR      float32
+	TyreSlipRatioRL      float32
+	TyreSlipRatioRR      float32
 	TimeOnTrack          Duration
 	TotalLaps            int16
 	CurrentPosition      int16
@@ -134,10 +134,10 @@ func NewGTData(ddata []byte) GTData {
 	data.CarSpeed = 3.6 * math.Float32frombits(binary.LittleEndian.Uint32(ddata[0x4C:0x4C+4]))
 
 	if data.CarSpeed > 0 {
-		data.TyreSlipRatioFL = fmt.Sprintf("%.2f", data.TypeSpeedFL/data.CarSpeed)
-		data.TyreSlipRatioFR = fmt.Sprintf("%.2f", data.TypeSpeedFR/data.CarSpeed)
-		data.TyreSlipRatioRL = fmt.Sprintf("%.2f", data.TypeSpeedRL/data.CarSpeed)
-		data.TyreSlipRatioRR = fmt.Sprintf("%.2f", data.TyreSpeedRR/data.CarSpeed)
+		data.TyreSlipRatioFL = data.TypeSpeedFL / data.CarSpeed
+		data.TyreSlipRatioFR = data.TypeSpeedFR / data.CarSpeed
+		data.TyreSlipRatioRL = data.TypeSpeedRL / data.CarSpeed
+		data.TyreSlipRatioRR = data.TyreSpeedRR / data.CarSpeed
 	}
 
 	data.TimeOnTrack = Duration{
